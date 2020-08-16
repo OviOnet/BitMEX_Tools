@@ -4,9 +4,8 @@ from datetime import datetime
 import logging
 import threading
 
-URL = "https://www.bitmex.com/api/v1/orderBook/L2?symbol=XBT&depth=50"
-
-
+URL_Book = "https://www.bitmex.com/api/v1/orderBook/L2?symbol=XBT&depth=350" 
+URL_Current_Price = "https://www.bitmex.com/api/v1/trade?symbol=XBT&count=1&reverse=true"
 now = datetime.now()
 current_time = now.strftime("%Y_%m_%d_%H_%M_%S")
 
@@ -16,11 +15,14 @@ logging.basicConfig(filename=logfile, level=logging.INFO)
 starttime = time.time()
 DetectedSpoofers = list()
 
-spoofer_minimum_size = 3500000
+spoofer_minimum_size = 2500000
 
 while(True):
-    r = requests.get(url = URL)
+    r = requests.get(url = URL_Book)
     data = r.json()
+
+    r_price = requests.get(url = URL_Current_Price)
+    data_price = r_price.json()
     
     for order in data:
         if(order["size"] > spoofer_minimum_size):
@@ -47,9 +49,14 @@ while(True):
                 DetectedSpoofers.append(spoofDict)
                 now = datetime.now()
                 current_time = now.strftime("%H:%M:%S")
-                print(current_time + " Potential " + str(spoofDict["size"]) +  " spoofer appended on the list " + spoofDict["side"] + " side at price : " +  str(order["price"]))
-                logging.info(current_time + " Potential " + str(spoofDict["size"]) +  " spoofer appended on the list " + spoofDict["side"] + " side at price : " +  str(order["price"]))
+                print(current_time + " Potential " + str(spoofDict["size"]) +  " spoofer detected " + spoofDict["side"] +
+                 " side at price : " + str(order["price"]) + " . " + 
+                 "Current price is " + str(data_price[0]["price"]))
+                logging.info(current_time + " Potential " + str(spoofDict["size"]) +  " spoofer appended " + spoofDict["side"] + 
+                " side at price : "  + str(order["price"]) + " . " +
+                 "Current price is " + str(data_price[0]["price"]))
     
+    print("Current price : " + str(data_price[0]["price"]))
     time.sleep(3)
     
 
