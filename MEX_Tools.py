@@ -16,7 +16,7 @@ logging.basicConfig(filename=logfile, level=logging.INFO)
 starttime = time.time()
 DetectedSpoofers = list()
 
-spoofer_minimum_size = 2500000
+spoofer_minimum_size = 3500000
 
 while(True):
     r = requests.get(url = URL)
